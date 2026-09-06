@@ -17,7 +17,7 @@ PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 
 OutputDir=out
-OutputBaseFilename=VeSCU-Setup-{#AppArch}-v{#AppVersion}
+OutputBaseFilename=VeSCU-v{#AppVersion}-{#AppArch}-installer
 Compression=lzma2/max
 SolidCompression=yes
 
