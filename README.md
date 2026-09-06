@@ -11,11 +11,9 @@
 
 ## Installation
 
-Download a release from [here](https://github.com/AsjerS/VeSCU/releases/latest) and install it.
+To install, run **`winget install AsjerS.VeSCU`**, or download a release from [here](https://github.com/AsjerS/VeSCU/releases/latest) and install it.
 
-Choose `x64` if you have an Intel/AMD CPU, and `arm64` if you have a Snapdragon CPU. If you're unsure choose `x64`.
-
-The program requires .NET 10 to run
+The program requires .NET Desktop Runtime 10 to run
 
 ## Features
 
@@ -46,6 +44,8 @@ Extension = ".jxl"
 
 [Encoder]
 # the path to the program used to encode the final image
+# values that can prompt an auto download are:
+# 'avifenc.exe', 'cjpeg.exe', 'cjxl.exe', 'cwebp.exe', 'oxipng.exe'
 Path = "cjxl.exe"
 # the arguments passed to the encoder, with {Output} being parsed to the final screenshot location
 Arguments = "-d 1 - {Output}"
