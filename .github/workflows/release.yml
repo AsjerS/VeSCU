@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number to release (major.minor.patch)'
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [win-x64, win-arm64]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Publish VeSCU (${{ matrix.arch }})
+      run: >
+        dotnet publish src/VeSCU/VeSCU.csproj
+        -c Release
+        -r ${{ matrix.arch }}
+        --self-contained false
+        -p:PublishSingleFile=true
+        -p:Version=${{ inputs.version }}
+
+    - name: Package Portable ZIP (${{ matrix.arch }})
+      shell: pwsh
+      run: |
+        $publishDir = "src/VeSCU/bin/Release/net10.0-windows/${{ matrix.arch }}/publish"
+        New-Item -ItemType Directory -Force -Path dist
+        New-Item -ItemType File -Force -Path "$publishDir/config.toml"
+        Compress-Archive -Path "$publishDir/VeSCU.exe", "$publishDir/config.toml" -DestinationPath "dist/VeSCU-v${{ inputs.version }}-${{ matrix.arch }}-portable.zip"
+
+    - name: Setup Inno Setup
+      uses: diyan/setup-inno-setup@v1
+
+    - name: Compile Installer (${{ matrix.arch }})
+      run: iscc /DAppArch=${{ matrix.arch }} /DAppVersion=${{ inputs.version }} installer/setup.iss
+
+    - name: Move Installer to Dist
+      shell: pwsh
+      run: Move-Item installer/out/*.exe dist/
+
+    - name: Upload Packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: VeSCU-Packages-${{ matrix.arch }}
+        path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all packages
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ inputs.version }}
+        name: VeSCU v${{ inputs.version }}
+        files: dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

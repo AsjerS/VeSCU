@@ -1,3 +1,19 @@
 <Solution>
-  <Project Path="VeSCU.csproj" />
+  <Folder Name="/GitHub Workflows/">
+    <File Path=".github/workflows/release.yml" />
+  </Folder>
+  <Folder Name="/Installer/">
+    <File Path="installer/setup.iss" />
+  </Folder>
+  <Folder Name="/Manifests/">
+    <File Path="manifests/encoders-v1.json" />
+  </Folder>
+  <Folder Name="/Root/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="build.bat" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/VeSCU/VeSCU.csproj" />
 </Solution>
