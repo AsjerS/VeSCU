@@ -1,0 +1,36 @@
+<svg
+  width="128"
+  height="128"
+  viewBox="0 0 128 128"
+  xmlns="http://www.w3.org/2000/svg">
+
+	<!-- © 2026 Asjer Severin -->
+
+	<defs>
+		<clipPath id="v-border-clip">
+			<rect x="-50" y="4" width="192" height="120" />
+		</clipPath>
+		<clipPath id="v-core-clip">
+			<rect x="-50" y="8" width="192" height="112" />
+		</clipPath>
+		<clipPath id="e-core-clip">
+			<rect x="0" y="0" width="120" height="128" />
+		</clipPath>
+		<path id="v-path" d="M 11,0 L 64,120 L 117,0" />
+		<g id="e-bars">
+			<path d="M 89,64  H 124" />
+			<path d="M 78,89  H 124" />
+			<path d="M 67,114 H 124" />
+		</g>
+	</defs>
+
+	<g fill="none" stroke="#100040" stroke-width="20" stroke-linecap="butt">
+		<use href="#v-path" clip-path="url(#v-border-clip)" stroke-linejoin="bevel" />
+		<use href="#e-bars" />
+	</g>
+
+	<g fill="none" stroke="#7229e1" stroke-width="12" stroke-linecap="butt">
+		<use href="#v-path" clip-path="url(#v-core-clip)" stroke-linejoin="bevel" />
+		<use href="#e-bars" clip-path="url(#e-core-clip)" />
+	</g>
+</svg>

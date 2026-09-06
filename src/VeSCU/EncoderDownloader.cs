@@ -7,7 +7,7 @@ namespace VeSCU;
 
 public static class EncoderDownloader
 {
-    private const string ManifestUrl = "https://raw.githubusercontent.com/AsjerS/VeSCU/main/encoders.json";
+    private const string ManifestUrl = "https://raw.githubusercontent.com/AsjerS/VeSCU/main/manifests/encoders-v1.json";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -52,12 +52,23 @@ public static class EncoderDownloader
         Directory.CreateDirectory(destinationDir);
         string targetFilePath = Path.Combine(destinationDir, file);
 
-        using Stream networkStream = await client.GetStreamAsync(downloadUrl);
+        using Stream networkStream = await client.GetStreamAsync(downloadUrl!);
         using var archive = new ZipArchive(networkStream, ZipArchiveMode.Read);
 
-        ZipArchiveEntry entry = archive.Entries.FirstOrDefault(e =>
-            e.Name.Equals(file, StringComparison.OrdinalIgnoreCase)
-        ) ?? throw new FileNotFoundException($"Archive did not contain '{file}'.");
+        ZipArchiveEntry entry = archive.Entries.FirstOrDefault(
+            e => e.Name.Equals(
+                file,
+                StringComparison.OrdinalIgnoreCase
+            )
+        ) ?? archive.Entries.FirstOrDefault(
+            e => e.Name.StartsWith(Path.GetFileNameWithoutExtension(file),
+            StringComparison.OrdinalIgnoreCase
+        ) && e.Name.EndsWith(
+            ".exe",
+            StringComparison.OrdinalIgnoreCase
+        )) ?? throw new FileNotFoundException(
+            $"Archive did not contain '{file}'."
+        );
 
         entry.ExtractToFile(targetFilePath, overwrite: true);
     }

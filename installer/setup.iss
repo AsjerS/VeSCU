@@ -10,6 +10,7 @@ AppName=VeSCU
 AppVersion={#AppVersion}
 DefaultDirName={autopf}\VeSCU
 DefaultGroupName=VeSCU
+SetupIconFile=..\src\VeSCU\app.ico
 
 ArchitecturesInstallIn64BitMode=x64compatible arm64
 PrivilegesRequired=lowest
@@ -37,6 +38,8 @@ Filename: "{app}\VeSCU.exe"; Description: "Launch VeSCU now"; Flags: nowait post
 
 [UninstallDelete]
 Type: files; Name: "{app}\config_init.toml"
+Type: filesandordirs; Name: "{localappdata}\VeSCU"
+Type: filesandordirs; Name: "{userappdata}\VeSCU"
 
 [Code]
 type
@@ -110,9 +113,9 @@ begin
   PNG  := MakeCodec('PNG',     '.png',  'oxipng.exe',  'Png', 'Large', 'Max');
 
   AddPreset(LossyPresets, JXL,  '-d 1 - {Output}');
-  AddPreset(LossyPresets, WebP, '-q 85 -m 6 -o {Output} -- -');
-  AddPreset(LossyPresets, AVIF, '-s 6 -q 80 - {Output}');
-  AddPreset(LossyPresets, JPEG, '-quality 85 -outfile {Output}');
+  AddPreset(LossyPresets, WebP, '-q 90 -m 6 -o {Output} -- -');
+  AddPreset(LossyPresets, AVIF, '-s 6 -q 85 - {Output}');
+  AddPreset(LossyPresets, JPEG, '-quality 90 -outfile {Output}');
 
   AddPreset(LosslessPresets, JXL,  '-d 0 - {Output}');
   AddPreset(LosslessPresets, WebP, '-z 9 -o {Output} -- -');

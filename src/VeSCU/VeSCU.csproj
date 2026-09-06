@@ -10,6 +10,7 @@
     <SelfContained>false</SelfContained>
     <PublishReadyToRun>true</PublishReadyToRun>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<ApplicationIcon>app.ico</ApplicationIcon>
 	<Version>0.1.0</Version>
   </PropertyGroup>
 
