@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace VeSCU;
 
@@ -78,26 +79,40 @@ static class Program
                 return false;
             }
 
-            try
+            // run download
+            Exception? downloadError = null;
             {
-                await EncoderDownloader.DownloadAsync(encoder, AppPaths.ToolsDirectory);
-                return true;
-            }
-            catch (Exception ex) when (ex is FileNotFoundException or PlatformNotSupportedException)
-            {
-                ShowConfigError(ex.Message);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Download failed:\n\n{ex.Message}",
-                    "Network Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
+                using var dialog = new DownloadDialog(encoder, () =>
+                    EncoderDownloader.DownloadAsync(encoder, AppPaths.ToolsDirectory)
                 );
+
+                if (dialog.ShowDialog() != DialogResult.OK)
+                {
+                    downloadError = dialog.Error;
+                }
+            }
+
+            // handle errors
+            if (downloadError is not null)
+            {
+                if (downloadError is FileNotFoundException or PlatformNotSupportedException)
+                {
+                    ShowConfigError(downloadError.Message);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"Download failed:\n\n{downloadError.Message}",
+                        "Network Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+
                 return false;
             }
+
+            return true;
         }
 
         return true;
@@ -127,5 +142,62 @@ static class Program
             MessageBoxButtons.OK,
             MessageBoxIcon.Error
         );
+    }
+
+    private sealed class DownloadDialog : Form
+    {
+        private readonly Func<Task> _work;
+        public Exception? Error { get; private set; }
+
+        public DownloadDialog(string encoder, Func<Task> work)
+        {
+            _work = work;
+
+            Text = "VeSCU";
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            ClientSize = new Size(320, 85);
+            TopMost = true;
+
+            var label = new Label
+            {
+                Text = $"Downloading {encoder}...",
+                Location = new Point(16, 16),
+                AutoSize = true
+            };
+
+            var bar = new ProgressBar
+            {
+                Style = ProgressBarStyle.Marquee,
+                MarqueeAnimationSpeed = 30,
+                Location = new Point(16, 40),
+                Size = new Size(288, 20)
+            };
+
+            Controls.Add(label);
+            Controls.Add(bar);
+        }
+
+        protected override async void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            try
+            {
+                await _work();
+                DialogResult = DialogResult.OK;
+            }
+            catch (Exception ex)
+            {
+                Error = ex;
+                DialogResult = DialogResult.Abort;
+            }
+            finally
+            {
+                Close();
+            }
+        }
     }
 }

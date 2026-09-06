@@ -8,13 +8,5 @@
   <Folder Name="/Manifests/">
     <File Path="manifests/encoders-v1.json" />
   </Folder>
-  <Folder Name="/Meta/">
-    <File Path=".gitattributes" />
-    <File Path=".gitignore" />
-    <File Path="assets/logo.svg" />
-    <File Path="build.bat" />
-    <File Path="LICENSE" />
-    <File Path="README.md" />
-  </Folder>
   <Project Path="src/VeSCU/VeSCU.csproj" />
 </Solution>

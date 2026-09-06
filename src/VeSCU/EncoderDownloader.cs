@@ -15,7 +15,7 @@ public static class EncoderDownloader
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public static async Task DownloadAsync(string exeName, string destinationDir)
+    public static async Task DownloadAsync(string encoder, string destinationDir)
     {
         using var client = new HttpClient();
         client.DefaultRequestHeaders.UserAgent.ParseAdd("VeSCU-Downloader");
@@ -29,7 +29,7 @@ public static class EncoderDownloader
         ) ?? throw new InvalidOperationException("Failed to read encoder catalog.");
 
         // check if exe exists in the catalog
-        string file = Path.GetFileName(exeName);
+        string file = Path.GetFileName(encoder);
 
         if (!manifest.TryGetValue(file, out var archMap))
         {
