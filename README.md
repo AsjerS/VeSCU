@@ -11,9 +11,9 @@
 
 ## Installation
 
-To install, run **`winget install AsjerS.VeSCU`**, or download a release from [here](https://github.com/AsjerS/VeSCU/releases/latest) and install it.
+To install, run **`winget install AsjerS.VeSCU`**, or download a release from [**here**](https://github.com/AsjerS/VeSCU/releases/latest) and install it.
 
-The program requires .NET Desktop Runtime 10 to run
+The program requires .NET Desktop Runtime 10 to run.
 
 ## Features
 
