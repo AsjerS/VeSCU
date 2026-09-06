@@ -34,7 +34,7 @@ public class ScreenshotContext : ApplicationContext
         // setup tray icon
         _trayIcon = new NotifyIcon
         {
-            Text = "Custom Encoder Screenshot Utility",
+            Text = "VeSCU",
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
             ContextMenuStrip = trayMenu,
             Visible = true
