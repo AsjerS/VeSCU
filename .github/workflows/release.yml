@@ -41,7 +41,7 @@ jobs:
         Compress-Archive -Path "$publishDir/VeSCU.exe", "$publishDir/config.toml" -DestinationPath "dist/VeSCU-v${{ inputs.version }}-${{ matrix.arch }}-portable.zip"
 
     - name: Setup Inno Setup
-      uses: diyan/setup-inno-setup@v1
+      run: choco install innosetup -y --no-progress
 
     - name: Compile Installer (${{ matrix.arch }})
       run: iscc /DAppArch=${{ matrix.arch }} /DAppVersion=${{ inputs.version }} installer/setup.iss
