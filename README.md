@@ -22,9 +22,9 @@ The program requires .NET 10 to run
 - Captures your screen, converts the pixels to a format encoders can understand with custom built functions, and hands it to an encoder of your choice.
 - Made to be undisruptive: taking a screenshot does not shift focus, and works with lower CPU priority than your apps and games.
 - Out-of-the-box support for JPEG XL, AVIF, WebP, PNG and JPEG.
-  - And with a simple configuration edit, it can stream pixels to any encoder executable you have that supports stdin.
+  - And with a custom configuration, it can stream pixels to any encoder executable you have that supports stdin.
 - Doesn't perform any unnecessary disk writes.
-- Only connects to the internet when you prompt it to.
+- Only connects to the internet when you prompt it to; used to autonomously download+install encoders.
 
 ## Configuration
 
