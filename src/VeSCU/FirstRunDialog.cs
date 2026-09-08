@@ -18,8 +18,8 @@ public sealed class FirstRunDialog : Form
         "cjxl.exe",
         ".jxl",
         AppConfig.InputFormat.Ppm,
-        "Tiny",
-        "Low"
+        "tiny",
+        "low"
     );
 
     private static readonly Codec Avif = new(
@@ -27,8 +27,8 @@ public sealed class FirstRunDialog : Form
         "avifenc.exe",
         ".avif",
         AppConfig.InputFormat.Ppm,
-        "Small",
-        "Mid"
+        "small",
+        "medium"
     );
 
     private static readonly Codec WebP = new(
@@ -36,8 +36,8 @@ public sealed class FirstRunDialog : Form
         "cwebp.exe",
         ".webp",
         AppConfig.InputFormat.Ppm,
-        "Mid",
-        "High"
+        "medium",
+        "high"
     );
 
     private static readonly Codec Jpeg = new(
@@ -45,8 +45,8 @@ public sealed class FirstRunDialog : Form
         "cjpeg.exe",
         ".jpg",
         AppConfig.InputFormat.Ppm,
-        "Large",
-        "Max"
+        "large",
+        "max"
     );
 
     private static readonly Codec Png = new(
@@ -54,15 +54,14 @@ public sealed class FirstRunDialog : Form
         "oxipng.exe",
         ".png",
         AppConfig.InputFormat.Png,
-        "Large",
-        "Max"
+        "large",
+        "max"
     );
 
     private record Preset(Codec Codec, string Args, bool IsLossless)
     {
         public string DisplayText =>
-            $"{Codec.Name} ({Codec.SavingExt}, {Codec.EncoderPath})" +
-            $" - Size: {Codec.Size} | Compatibility: {Codec.Compat}";
+            $"{Codec.Name} ({Codec.SavingExt}): {Codec.Size} size, {Codec.Compat} compatibility";
     }
 
     private static readonly Preset[] Presets = [
@@ -90,7 +89,10 @@ public sealed class FirstRunDialog : Form
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
 
-        ClientSize = new Size(370, 290);
+        AutoScaleDimensions = new SizeF(96F, 96F);
+        AutoScaleMode = AutoScaleMode.Dpi;
+
+        ClientSize = LogicalToDeviceUnits(new Size(330, 260));
 
         var bottomBar = new TableLayoutPanel
         {
@@ -155,16 +157,7 @@ public sealed class FirstRunDialog : Form
 
         content.Controls.Add(new Label
         {
-            Text = "It looks like this is your first time running VeSCU.\n" +
-            "Choose a preset below to get started.\n" +
-            "This can be changed/tweaked at any time in the config.",
-            AutoSize = true,
-            Margin = new Padding(0, 0, 0, 12)
-        });
-
-        content.Controls.Add(new Label
-        {
-            Text = "Quality level:",
+            Text = "Image quality:",
             AutoSize = true,
             Margin = new Padding(0, 0, 0, 8)
         });

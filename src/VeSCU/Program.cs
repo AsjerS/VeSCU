@@ -9,6 +9,7 @@ static class Program
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
         Application.ThreadException += (s, e) =>
             ShowAppError(e.Exception);
