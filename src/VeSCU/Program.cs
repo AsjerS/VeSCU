@@ -9,11 +9,12 @@ static class Program
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
-        Application.ThreadException += (s, e) =>
+        Application.ThreadException += (_, e) =>
             ShowAppError(e.Exception);
 
-        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
             ShowAppError(e.ExceptionObject as Exception);
 
         try
