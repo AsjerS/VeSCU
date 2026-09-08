@@ -32,8 +32,7 @@ echo [2/2] Compiling Inno Setup installer...
 if exist "installer\out" (
     rmdir /s /q "installer\out"
 )
-for /f "tokens=3 delims=<>" %%v in ('findstr "<Version>" src\VeSCU\VeSCU.csproj') do set "VERSION=%%v"
-"%ISCC%" /DAppArch=%ARCH% /DAppVersion=%VERSION% installer\setup.iss
+"%ISCC%" /DAppArch=%ARCH% /DAppVersion="dev" installer\setup.iss
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Inno Setup failed!
     exit /b %ERRORLEVEL%

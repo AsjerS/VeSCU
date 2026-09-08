@@ -38,7 +38,7 @@ jobs:
         $publishDir = "src/VeSCU/bin/Release/net10.0-windows/${{ matrix.arch }}/publish"
         New-Item -ItemType Directory -Force -Path dist
         New-Item -ItemType File -Force -Path "$publishDir/config.toml"
-        Compress-Archive -Path "$publishDir/VeSCU.exe", "$publishDir/config.toml" -DestinationPath "dist/VeSCU-v${{ inputs.version }}-${{ matrix.arch }}-portable.zip"
+        Compress-Archive -Path "$publishDir/VeSCU.exe", "$publishDir/config.toml" -DestinationPath "dist/VeSCU-${{ matrix.arch }}-portable.zip"
 
     - name: Setup Inno Setup
       run: choco install innosetup -y --no-progress
