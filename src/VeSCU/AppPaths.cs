@@ -2,16 +2,16 @@
 
 public static class AppPaths
 {
-    public static string AppDirectory =>
+    public static string AppDirectory { get; } =
         AppDomain.CurrentDomain.BaseDirectory;
 
-    public static bool IsPortable =>
+    public static bool IsPortable { get; } =
         File.Exists(Path.Combine(
             AppDirectory,
             "config.toml"
         ));
 
-    public static string ConfigFile => IsPortable
+    public static string ConfigFile { get; } = IsPortable
         ? Path.Combine(
             AppDirectory,
             "config.toml"
@@ -22,13 +22,7 @@ public static class AppPaths
             "config.toml"
         );
 
-    public static string InitConfigFile =>
-        Path.Combine(
-            AppDirectory,
-            "config_init.toml"
-        );
-
-    public static string ToolsDirectory => IsPortable
+    public static string ToolsDirectory { get; } = IsPortable
         ? Path.Combine(
             AppDirectory,
             "bin"

@@ -41,23 +41,22 @@ public class AppConfig
     {
         try
         {
-            if (File.Exists(AppPaths.ConfigFile))
+            if (File.Exists(AppPaths.ConfigFile) && new FileInfo(AppPaths.ConfigFile).Length > 0)
             {
                 string tomlText = File.ReadAllText(AppPaths.ConfigFile);
                 var config = TomlSerializer.Deserialize<AppConfig>(tomlText) ?? new AppConfig();
+
                 if (!HasAllKeys(tomlText)) config.Save();
                 return config;
             }
 
-            if (File.Exists(AppPaths.InitConfigFile))
+            using var dialog = new FirstRunDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                var seededConfig = TomlSerializer.Deserialize<AppConfig>(
-                    File.ReadAllText(AppPaths.InitConfigFile)
-                ) ?? new AppConfig();
-                return seededConfig.Save();
+                return dialog.SelectedConfig.Save();
             }
 
-            return new AppConfig().Save();
+            return null;
         }
         catch (Exception ex)
         {
