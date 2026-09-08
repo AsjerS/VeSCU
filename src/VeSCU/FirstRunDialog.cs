@@ -75,8 +75,10 @@ public sealed class FirstRunDialog : Form
         new(Png, "-o 2 --out {Output} -", IsLossless: true)
     ];
 
-    private readonly RadioButton _radioNearLossless;
-    private readonly RadioButton _radioLossless;
+    private readonly RadioButton _radioNearLossless = new()
+        { Text = "Near-lossless (recommended)", AutoSize = true, Checked = true };
+    private readonly RadioButton _radioLossless = new()
+        { Text = "Lossless (pixel perfect)", AutoSize = true };
     private readonly RadioButton[] _codecRadios = new RadioButton[4];
 
     public AppConfig SelectedConfig { get; private set; } = new();
@@ -89,101 +91,76 @@ public sealed class FirstRunDialog : Form
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
 
-        AutoScaleDimensions = new SizeF(96F, 96F);
-        AutoScaleMode = AutoScaleMode.Dpi;
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowOnly;
 
-        ClientSize = LogicalToDeviceUnits(new Size(330, 260));
-
-        var bottomBar = new TableLayoutPanel
+        var mainLayout = new TableLayoutPanel
         {
-            Dock = DockStyle.Bottom,
+            Dock = DockStyle.Fill,
             AutoSize = true,
-            ColumnCount = 2,
-            RowCount = 1,
-            Padding = new Padding(16, 8, 16, 16)
+            ColumnCount = 1,
+            RowCount = 2,
+            Padding = new Padding(16)
         };
-        bottomBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        bottomBar.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        Controls.Add(bottomBar);
-
-        var link = new LinkLabel
-        {
-            Text = "View detailed comparison ↗",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left
-        };
-        link.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo(
-            "https://jpegxl.info/resources/battle-of-codecs.html"
-        )
-        { UseShellExecute = true });
-        bottomBar.Controls.Add(link, 0, 0);
-
-        var btn = new Button
-        {
-            Text = "Save and Continue",
-            DialogResult = DialogResult.OK,
-            AutoSize = true,
-            Anchor = AnchorStyles.Right,
-        };
-        btn.Click += (s, e) =>
-        {
-            var checkedRadio = _codecRadios.FirstOrDefault(r => r.Visible && r.Checked);
-            if (checkedRadio?.Tag is not Preset chosen) return;
-
-            SelectedConfig = new AppConfig
-            {
-                Saving = new(
-                    Extension: chosen.Codec.SavingExt
-                ),
-                Encoder = new(
-                    Path: chosen.Codec.EncoderPath,
-                    Arguments: chosen.Args,
-                    InputFormat: chosen.Codec.Format
-                )
-            };
-        };
-        bottomBar.Controls.Add(btn, 1, 0);
-        AcceptButton = btn;
+        Controls.Add(mainLayout);
 
         var content = new FlowLayoutPanel
         {
-            Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
             AutoSize = true,
-            Padding = new Padding(16, 16, 16, 0)
+            Margin = new Padding(0)
         };
-        Controls.Add(content);
+        mainLayout.Controls.Add(content, 0, 0);
 
-        content.Controls.Add(new Label
+        content.Controls.Add(CreateQualitySection());
+        content.Controls.Add(CreateCodecSection());
+        mainLayout.Controls.Add(CreateBottomBar(), 0, 1);
+
+        _radioNearLossless.CheckedChanged += (_, _) => UpdateCodecRadios();
+        _radioLossless.CheckedChanged += (_, _) => UpdateCodecRadios();
+        UpdateCodecRadios();
+    }
+
+    private FlowLayoutPanel CreateQualitySection()
+    {
+        var panel = new FlowLayoutPanel
+        {
+            FlowDirection = FlowDirection.TopDown,
+            AutoSize = true,
+            Margin = new Padding(0)
+        };
+
+        panel.Controls.Add(new Label
         {
             Text = "Image quality:",
             AutoSize = true,
-            Margin = new Padding(0, 0, 0, 8)
+            Margin = new Padding(0, 0, 0, 6)
         });
 
         var modePanel = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.TopDown,
             AutoSize = true,
-            Margin = new Padding(4, 0, 0, 12)
-        };
-        _radioNearLossless = new RadioButton
-        {
-            Text = "Near-lossless (recommended)",
-            AutoSize = true,
-            Checked = true
-        };
-        _radioLossless = new RadioButton
-        {
-            Text = "Lossless (pixel perfect)",
-            AutoSize = true
+            Margin = new Padding(4, 0, 0, 10)
         };
         modePanel.Controls.Add(_radioNearLossless);
         modePanel.Controls.Add(_radioLossless);
-        content.Controls.Add(modePanel);
+        panel.Controls.Add(modePanel);
 
-        content.Controls.Add(new Label
+        return panel;
+    }
+
+    private FlowLayoutPanel CreateCodecSection()
+    {
+        var panel = new FlowLayoutPanel
+        {
+            FlowDirection = FlowDirection.TopDown,
+            AutoSize = true,
+            Margin = new Padding(0)
+        };
+
+        panel.Controls.Add(new Label
         {
             Text = "Image format:",
             AutoSize = true,
@@ -196,7 +173,7 @@ public sealed class FirstRunDialog : Form
             AutoSize = true,
             Margin = new Padding(4, 0, 0, 0)
         };
-        content.Controls.Add(codecPanel);
+        panel.Controls.Add(codecPanel);
 
         for (int i = 0; i < _codecRadios.Length; i++)
         {
@@ -204,9 +181,46 @@ public sealed class FirstRunDialog : Form
             codecPanel.Controls.Add(_codecRadios[i]);
         }
 
-        _radioNearLossless.CheckedChanged += (s, e) => UpdateCodecRadios();
-        _radioLossless.CheckedChanged += (s, e) => UpdateCodecRadios();
-        UpdateCodecRadios();
+        return panel;
+    }
+
+    private TableLayoutPanel CreateBottomBar()
+    {
+        var bottomBar = new TableLayoutPanel
+        {
+            AutoSize = true,
+            ColumnCount = 2,
+            RowCount = 1,
+            Anchor = AnchorStyles.Left | AnchorStyles.Right,
+            Margin = new Padding(0, 14, 0, 0)
+        };
+        bottomBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        bottomBar.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+
+        var link = new LinkLabel
+        {
+            Text = "Detailed comparison ↗",
+            AutoSize = true,
+            Anchor = AnchorStyles.Left
+        };
+        link.LinkClicked += (_, _) => Process.Start(new ProcessStartInfo(
+            "https://jpegxl.info/resources/battle-of-codecs.html"
+        )
+        { UseShellExecute = true });
+        bottomBar.Controls.Add(link, 0, 0);
+
+        var btn = new Button
+        {
+            Text = "Save and Continue",
+            DialogResult = DialogResult.OK,
+            AutoSize = true,
+            Anchor = AnchorStyles.Right,
+        };
+        btn.Click += OnSaveAndContinue;
+        bottomBar.Controls.Add(btn, 1, 0);
+        AcceptButton = btn;
+
+        return bottomBar;
     }
 
     private void UpdateCodecRadios()
@@ -233,5 +247,18 @@ public sealed class FirstRunDialog : Form
         {
             _codecRadios[0].Checked = true;
         }
+    }
+
+    private void OnSaveAndContinue(object? sender, EventArgs e)
+    {
+        var checkedRadio = _codecRadios.FirstOrDefault(r => r.Visible && r.Checked);
+        if (checkedRadio?.Tag is not Preset chosen) return;
+
+        var defaults = new AppConfig();
+        SelectedConfig = new AppConfig
+        {
+            Saving = defaults.Saving with { Extension = chosen.Codec.SavingExt },
+            Encoder = new(chosen.Codec.EncoderPath, chosen.Args, chosen.Codec.Format)
+        };
     }
 }
