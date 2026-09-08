@@ -21,7 +21,7 @@ static class Program
             AppConfig? config = AppConfig.Load();
             if (config is null) return;
 
-            if (!await EnsurePrerequisitesAsync(config)) return;
+            if (!EnsurePrerequisites(config)) return;
 
             Application.Run(new ScreenshotContext(config));
         }
@@ -31,10 +31,10 @@ static class Program
         }
     }
 
-    private static async Task<bool> EnsurePrerequisitesAsync(AppConfig config)
+    private static bool EnsurePrerequisites(AppConfig config)
     {
-        // ensure saving directory exists
-        if (string.IsNullOrWhiteSpace(config.Saving?.Directory))
+        // Saving.Directory checks
+        if (string.IsNullOrWhiteSpace(config.Saving.Directory))
         {
             ShowConfigError("Invalid saving directory:\n\nPath is empty.");
             return false;
@@ -52,18 +52,18 @@ static class Program
             return false;
         }
 
-        // ensure encoder exists
-        if (string.IsNullOrWhiteSpace(config.Encoder?.Path))
+        // Encoder.Path checks
+        if (string.IsNullOrWhiteSpace(config.Encoder.Path))
         {
             ShowConfigError("Invalid encoder path:\n\nPath is empty.");
             return false;
         }
 
-        // prompt encoder download
-        if (!AppPaths.IsEncoderAvailable(config.Encoder.Path))
+        if (AppPaths.ResolveEncoder(config.Encoder.Path) is null)
         {
             string encoder = Path.GetFileName(config.Encoder.Path);
 
+            // prompt encoder download
             var prompt = MessageBox.Show(
                 $"Encoder '{encoder}' was not found.\n\n" +
                 "Would you like to attempt to download it from the internet?",
@@ -79,39 +79,32 @@ static class Program
             }
 
             // run download
-            Exception? downloadError = null;
-            {
-                using var dialog = new DownloadDialog(encoder, () =>
-                    EncoderDownloader.DownloadAsync(encoder, AppPaths.ToolsDirectory)
-                );
+            using var dialog = new EncoderDownloader.DownloadDialog(encoder, () =>
+                EncoderDownloader.DownloadAsync(encoder, AppPaths.ToolsDirectory)
+            );
 
-                if (dialog.ShowDialog() != DialogResult.OK)
-                {
-                    downloadError = dialog.Error;
-                }
-            }
-
-            // handle errors
-            if (downloadError is not null)
+            if (dialog.ShowDialog() != DialogResult.OK)
             {
-                if (downloadError is FileNotFoundException or PlatformNotSupportedException)
+                switch (dialog.Error)
                 {
-                    ShowConfigError(downloadError.Message);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        $"Download failed:\n\n{downloadError.Message}",
-                        "Network Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
+                    case FileNotFoundException or PlatformNotSupportedException:
+                        ShowConfigError(
+                            dialog.Error.Message
+                        );
+                        break;
+
+                    case Exception ex:
+                        MessageBox.Show(
+                            $"Download failed:\n\n{ex.Message}",
+                            "Network Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        break;
                 }
 
                 return false;
             }
-
-            return true;
         }
 
         return true;
@@ -141,62 +134,5 @@ static class Program
             MessageBoxButtons.OK,
             MessageBoxIcon.Error
         );
-    }
-
-    private sealed class DownloadDialog : Form
-    {
-        private readonly Func<Task> _work;
-        public Exception? Error { get; private set; }
-
-        public DownloadDialog(string encoder, Func<Task> work)
-        {
-            _work = work;
-
-            Text = "VeSCU";
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(320, 85);
-            TopMost = true;
-
-            var label = new Label
-            {
-                Text = $"Downloading {encoder}...",
-                Location = new Point(16, 16),
-                AutoSize = true
-            };
-
-            var bar = new ProgressBar
-            {
-                Style = ProgressBarStyle.Marquee,
-                MarqueeAnimationSpeed = 30,
-                Location = new Point(16, 40),
-                Size = new Size(288, 20)
-            };
-
-            Controls.Add(label);
-            Controls.Add(bar);
-        }
-
-        protected override async void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-
-            try
-            {
-                await _work();
-                DialogResult = DialogResult.OK;
-            }
-            catch (Exception ex)
-            {
-                Error = ex;
-                DialogResult = DialogResult.Abort;
-            }
-            finally
-            {
-                Close();
-            }
-        }
     }
 }

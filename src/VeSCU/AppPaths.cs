@@ -53,9 +53,6 @@ public static class AppPaths
         return FindInPathEnv(path);
     }
 
-    public static bool IsEncoderAvailable(string path) =>
-        ResolveEncoder(path) is not null;
-
     private static string? FindInPathEnv(string fileName)
     {
         string? pathEnv = Environment.GetEnvironmentVariable("PATH");

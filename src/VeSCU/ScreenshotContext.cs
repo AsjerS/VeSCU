@@ -6,12 +6,14 @@ namespace VeSCU;
 public class ScreenshotContext : ApplicationContext
 {
     private readonly AppConfig _config;
+    private readonly string _encoderPath;
     private readonly NotifyIcon _trayIcon;
     private readonly HotkeyListener _hotkeyListener;
 
     public ScreenshotContext(AppConfig config)
     {
         _config = config;
+        _encoderPath = AppPaths.ResolveEncoder(_config.Encoder.Path)!;
 
         // setup hotkey
         _hotkeyListener = new HotkeyListener(_config.Hotkey);
@@ -85,7 +87,7 @@ public class ScreenshotContext : ApplicationContext
             {
                 StartInfo = new()
                 {
-                    FileName = AppPaths.ResolveEncoder(_config.Encoder.Path),
+                    FileName = _encoderPath,
                     Arguments = _config.Encoder.Arguments.Replace("{Output}", $"\"{outputPath}\""),
                     UseShellExecute = false,
                     RedirectStandardInput = true,
