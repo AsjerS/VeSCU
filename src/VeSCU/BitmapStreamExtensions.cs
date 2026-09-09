@@ -1,7 +1,8 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Drawing.Imaging;
 using System.IO.Compression;
+using System.IO.Hashing;
 
 namespace VeSCU;
 
@@ -147,39 +148,24 @@ internal static class BitmapStreamExtensions
 
         static void WriteChunk(Stream stream, string type, byte[] data)
         {
-            byte[] lengthBytes = new byte[4];
+            Span<byte> lengthBytes = stackalloc byte[4];
             BinaryPrimitives.WriteInt32BigEndian(lengthBytes, data.Length);
             stream.Write(lengthBytes);
 
             byte[] typeBytes = System.Text.Encoding.ASCII.GetBytes(type);
             stream.Write(typeBytes);
 
-            if (data.Length > 0)
-            {
-                stream.Write(data);
-            }
+            if (data.Length > 0) stream.Write(data);
 
-            uint crc = CalculateCrc32(typeBytes, data);
-            byte[] crcBytes = new byte[4];
-            BinaryPrimitives.WriteUInt32BigEndian(crcBytes, crc);
+            var crc = new Crc32();
+            crc.Append(typeBytes);
+            crc.Append(data);
+
+            Span<byte> crcBytes = stackalloc byte[4];
+            crc.GetCurrentHash(crcBytes);
+            crcBytes.Reverse();
+
             stream.Write(crcBytes);
         }
-    }
-
-    private static uint CalculateCrc32(byte[] type, byte[] data)
-    {
-        uint crc = 0xFFFFFFFF;
-        void Update(byte[] bytes)
-        {
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                crc ^= bytes[i];
-                for (int j = 0; j < 8; j++)
-                    crc = (crc >> 1) ^ ((crc & 1) * 0xEDB88320);
-            }
-        }
-        Update(type);
-        Update(data);
-        return ~crc;
     }
 }
