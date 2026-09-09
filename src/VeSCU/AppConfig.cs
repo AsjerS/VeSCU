@@ -6,7 +6,7 @@ namespace VeSCU;
 
 internal sealed class AppConfig
 {
-    public record HotkeySection(
+    public sealed record HotkeySection(
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
         Keys Key = Keys.PrintScreen,
         bool Ctrl = true,
@@ -15,7 +15,7 @@ internal sealed class AppConfig
         bool Win = false
     );
 
-    public record SavingSection(
+    public sealed record SavingSection(
         string Directory = "%USERPROFILE%\\Pictures\\Screenshots",
         string Extension = ".jxl"
     );
@@ -26,7 +26,7 @@ internal sealed class AppConfig
         Png
     }
 
-    public record EncoderSection(
+    public sealed record EncoderSection(
         string Path = "cjxl.exe",
         string Arguments = "-d 1 - {Output}",
         [property: JsonConverter(typeof(JsonStringEnumConverter))]

@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace VeSCU;
 
 internal sealed class FirstRunDialog : Form
 {
-    private record Codec(
+    private sealed record Codec(
         string Name,
         string EncoderPath,
         string SavingExt,
@@ -58,7 +58,7 @@ internal sealed class FirstRunDialog : Form
         "max"
     );
 
-    private record Preset(Codec Codec, string Args, bool IsLossless)
+    private sealed record Preset(Codec Codec, string Args, bool IsLossless)
     {
         public string DisplayText =>
             $"{Codec.Name} ({Codec.SavingExt}): {Codec.Size} size, {Codec.Compat} compatibility";
