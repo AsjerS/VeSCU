@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace VeSCU;
 
-public static class EncoderDownloader
+internal static class EncoderDownloader
 {
     private const string ManifestUrl = "https://raw.githubusercontent.com/AsjerS/VeSCU/main/manifests/encoders-v1.json";
 

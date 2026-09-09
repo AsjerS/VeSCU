@@ -2,7 +2,7 @@
 
 namespace VeSCU;
 
-public sealed class FirstRunDialog : Form
+internal sealed class FirstRunDialog : Form
 {
     private record Codec(
         string Name,

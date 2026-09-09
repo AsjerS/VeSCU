@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 
 namespace VeSCU;
 
-public class ScreenshotContext : ApplicationContext
+internal sealed class ScreenshotContext : ApplicationContext
 {
     private readonly AppConfig _config;
     private readonly string _encoderPath;
@@ -58,7 +58,7 @@ public class ScreenshotContext : ApplicationContext
             // define screen bounds
             Rectangle bounds = (
                 Screen.PrimaryScreen
-                    ?? throw new Exception("No primary screen detected.")
+                    ?? throw new InvalidOperationException("No primary screen detected.")
             ).Bounds;
 
             // capture screen

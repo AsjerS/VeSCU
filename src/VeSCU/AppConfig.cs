@@ -4,7 +4,7 @@ using Tomlyn;
 
 namespace VeSCU;
 
-public class AppConfig
+internal sealed class AppConfig
 {
     public record HotkeySection(
         [property: JsonConverter(typeof(JsonStringEnumConverter))]

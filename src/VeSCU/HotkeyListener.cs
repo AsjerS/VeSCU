@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace VeSCU;
 
-public sealed partial class HotkeyListener : NativeWindow, IDisposable
+internal sealed partial class HotkeyListener : NativeWindow, IDisposable
 {
     private const int WM_HOTKEY = 0x0312;
     private const int HOTKEY_ID = 1;

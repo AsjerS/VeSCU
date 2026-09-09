@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace VeSCU;
 
-static class Program
+internal static class Program
 {
     [STAThread]
     static async Task Main()

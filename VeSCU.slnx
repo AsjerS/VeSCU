@@ -9,6 +9,7 @@
     <File Path="manifests/encoders-v1.json" />
   </Folder>
   <Folder Name="/Misc/">
+    <File Path=".editorconfig" />
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path="assets/logo.svg" />

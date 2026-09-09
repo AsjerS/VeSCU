@@ -5,7 +5,7 @@ using System.IO.Compression;
 
 namespace VeSCU;
 
-public static class BitmapStreamExtensions
+internal static class BitmapStreamExtensions
 {
     public static void WriteAs(this Bitmap bitmap, AppConfig.InputFormat format, Stream stream)
     {
