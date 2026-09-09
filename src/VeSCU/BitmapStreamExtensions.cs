@@ -3,6 +3,8 @@ using System.Buffers.Binary;
 using System.Drawing.Imaging;
 using System.IO.Compression;
 using System.IO.Hashing;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 namespace VeSCU;
 
@@ -32,8 +34,9 @@ internal static class BitmapStreamExtensions
         int rowByteCount = width * 3;
 
         // write header
-        byte[] header = System.Text.Encoding.ASCII.GetBytes($"P6\n{width} {height}\n255\n");
-        destination.Write(header, 0, header.Length);
+        Span<byte> header = stackalloc byte[64];
+        int headerLen = System.Text.Encoding.ASCII.GetBytes($"P6\n{width} {height}\n255\n", header);
+        destination.Write(header[..headerLen]);
 
         // lock bitmap to access raw memory later
         BitmapData data = bitmap.LockBits(
@@ -45,6 +48,15 @@ internal static class BitmapStreamExtensions
         // rent a buffer
         byte[] rowBuffer = ArrayPool<byte>.Shared.Rent(rowByteCount);
 
+        // define a shuffle mask for SSE3
+        Vector128<byte> shuffleMask = Vector128.Create(
+            2, 1, 0,
+            6, 5, 4,
+            10, 9, 8,
+            14, 13, 12,
+            0xFF, 0xFF, 0xFF, 0xFF
+        );
+
         // do the conversion
         try
         {
@@ -53,22 +65,41 @@ internal static class BitmapStreamExtensions
                 byte* scan0 = (byte*)data.Scan0.ToPointer();
                 int stride = data.Stride;
 
-                for (int y = 0; y < height; y++)
+                fixed (byte* pRowBuffer = rowBuffer)
                 {
-                    byte* row = scan0 + (y * stride);
-                    int bufferIndex = 0;
-
-                    for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
                     {
-                        int pixelIndex = x * 4;
+                        byte* src = scan0 + (y * stride);
+                        byte* dst = pRowBuffer;
+                        int x = 0;
 
-                        // BGRA -> RGB
-                        rowBuffer[bufferIndex++] = row[pixelIndex + 2]; // red
-                        rowBuffer[bufferIndex++] = row[pixelIndex + 1]; // green
-                        rowBuffer[bufferIndex++] = row[pixelIndex];     // blue
+                        if (Vector128.IsHardwareAccelerated)
+                        {
+                            for (; x <= width - 4; x += 4)
+                            {
+                                Vector128<byte> bgra = Sse2.LoadVector128(src);
+                                Vector128<byte> rgb = Ssse3.Shuffle(bgra, shuffleMask);
+
+                                *(long*)dst = rgb.AsInt64().GetElement(0);      // first 8 bytes
+                                *(int*)(dst + 8) = rgb.AsInt32().GetElement(2); // last 4 bytes
+
+                                src += 16;
+                                dst += 12;
+                            }
+                        }
+
+                        // fallback
+                        for (; x < width; x++)
+                        {
+                            dst[0] = src[2]; // red
+                            dst[1] = src[1]; // green
+                            dst[2] = src[0]; // blue
+                            src += 4;
+                            dst += 3;
+                        }
+
+                        destination.Write(rowBuffer, 0, rowByteCount);
                     }
-
-                    destination.Write(rowBuffer, 0, rowByteCount);
                 }
             }
         }
@@ -140,22 +171,29 @@ internal static class BitmapStreamExtensions
                 }
             }
 
-            WriteChunk(destination, "IDAT", idatStream.ToArray());
+            WriteChunk(
+                destination,
+                "IDAT",
+                idatStream.TryGetBuffer(out ArraySegment<byte> segment)
+                    ? segment.AsSpan()
+                    : idatStream.ToArray()
+            );
         }
 
         // IEND chunk
         WriteChunk(destination, "IEND", []);
 
-        static void WriteChunk(Stream stream, string type, byte[] data)
+        static void WriteChunk(Stream stream, string type, ReadOnlySpan<byte> data)
         {
             Span<byte> lengthBytes = stackalloc byte[4];
             BinaryPrimitives.WriteInt32BigEndian(lengthBytes, data.Length);
             stream.Write(lengthBytes);
 
-            byte[] typeBytes = System.Text.Encoding.ASCII.GetBytes(type);
+            Span<byte> typeBytes = stackalloc byte[4];
+            System.Text.Encoding.ASCII.GetBytes(type, typeBytes);
             stream.Write(typeBytes);
 
-            if (data.Length > 0) stream.Write(data);
+            if (!data.IsEmpty) stream.Write(data);
 
             var crc = new Crc32();
             crc.Append(typeBytes);
