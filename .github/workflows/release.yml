@@ -76,9 +76,3 @@ jobs:
         files: dist/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Submit to WinGet
-      uses: vedantmgoyal2009/winget-releaser@v2
-      with:
-        identifier: AsjerS.VeSCU
-        token: ${{ secrets.WINGET_TOKEN }}
