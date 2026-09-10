@@ -21,14 +21,11 @@ OutputBaseFilename=VeSCU-{#AppArch}-installer
 Compression=lzma2/max
 SolidCompression=yes
 
-[Tasks]
-Name: "startup"; Description: "Start VeSCU automatically with Windows"; Flags: checkedonce
-
 [Files]
 Source: "..\src\VeSCU\bin\Release\net10.0-windows\{#AppArch}\publish\VeSCU.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
-Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "VeSCU"; ValueData: """{app}\VeSCU.exe"""; Flags: uninsdeletevalue; Tasks: startup
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "VeSCU"; Flags: dontcreatekey uninsdeletevalue
 
 [Icons]
 Name: "{autoprograms}\VeSCU"; Filename: "{app}\VeSCU.exe"

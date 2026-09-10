@@ -28,6 +28,16 @@ internal sealed class ScreenshotContext : ApplicationContext
         trayMenu.Items.Add("Open Config", null, (s, e) =>
             Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true }));
 
+        if (!AppPaths.IsPortable)
+        {
+            trayMenu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (s, e) =>
+                AutoStartupManager.SetEnabled(((ToolStripMenuItem)s!).Checked))
+            {
+                CheckOnClick = true,
+                Checked = AutoStartupManager.IsEnabled()
+            });
+        }
+
         trayMenu.Items.Add("-");
 
         trayMenu.Items.Add("Exit", null, (s, e) =>
