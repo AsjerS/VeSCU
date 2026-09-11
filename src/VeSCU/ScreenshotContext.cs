@@ -5,10 +5,10 @@ namespace VeSCU;
 
 internal sealed class ScreenshotContext : ApplicationContext
 {
-    private readonly AppConfig _config;
-    private readonly string _encoderPath;
+    private AppConfig _config;
+    private string _encoderPath;
+    private HotkeyListener _hotkeyListener;
     private readonly NotifyIcon _trayIcon;
-    private readonly HotkeyListener _hotkeyListener;
 
     public ScreenshotContext(AppConfig config)
     {
@@ -27,6 +27,9 @@ internal sealed class ScreenshotContext : ApplicationContext
 
         trayMenu.Items.Add("Open Config", null, (s, e) =>
             Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true }));
+
+        trayMenu.Items.Add("Reload Config", null, (s, e) =>
+            ReloadConfig());
 
         if (!AppPaths.IsPortable)
         {
@@ -128,6 +131,40 @@ internal sealed class ScreenshotContext : ApplicationContext
         catch (Exception ex)
         {
             Program.ShowAppError(ex);
+        }
+    }
+
+    private void ReloadConfig()
+    {
+        try
+        {
+            // load new config
+            var config = AppConfig.Load();
+            if (config is null || !AppEnvironment.EnsurePrerequisites(config)) return;
+
+            // apply new config
+            _config = config;
+            _encoderPath = AppPaths.ResolveEncoder(config.Encoder.Path)!;
+            _hotkeyListener.Dispose();
+            _hotkeyListener = new HotkeyListener(config.Hotkey);
+            _hotkeyListener.HotkeyPressed += () => Task.Run(CaptureAndEncode);
+
+            // celebrate
+            MessageBox.Show(
+                "Configuration reloaded successfully.",
+                "VeSCU",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Failed to reload configuration:\n\n{ex.Message}",
+                "Configuration Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
         }
     }
 }
