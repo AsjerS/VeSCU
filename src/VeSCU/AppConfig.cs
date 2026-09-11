@@ -13,7 +13,19 @@ internal sealed class AppConfig
         bool Alt = true,
         bool Shift = false,
         bool Win = false
-    );
+    )
+    {
+        public override string ToString()
+        {
+            var parts = new List<string>(5);
+            if (Ctrl) parts.Add("Ctrl");
+            if (Shift) parts.Add("Shift");
+            if (Alt) parts.Add("Alt");
+            if (Win) parts.Add("Win");
+            parts.Add(Key.ToString());
+            return string.Join("+", parts);
+        }
+    }
 
     public sealed record SavingSection(
         string Directory = "%USERPROFILE%\\Pictures\\Screenshots",

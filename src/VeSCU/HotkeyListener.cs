@@ -6,6 +6,11 @@ internal sealed partial class HotkeyListener : NativeWindow, IDisposable
 {
     private const int WM_HOTKEY = 0x0312;
     private const int HOTKEY_ID = 1;
+
+    private const uint MOD_ALT = 0x0001;
+    private const uint MOD_CONTROL = 0x0002;
+    private const uint MOD_SHIFT = 0x0004;
+    private const uint MOD_WIN = 0x0008;
     private const uint MOD_NOREPEAT = 0x4000;
 
     [LibraryImport("user32.dll")]
@@ -23,17 +28,19 @@ internal sealed partial class HotkeyListener : NativeWindow, IDisposable
         CreateHandle(new CreateParams());
 
         uint fsModifiers = MOD_NOREPEAT;
-        if (hotkey.Alt) fsModifiers |= 0x0001;
-        if (hotkey.Ctrl) fsModifiers |= 0x0002;
-        if (hotkey.Shift) fsModifiers |= 0x0004;
-        if (hotkey.Win) fsModifiers |= 0x0008;
+        if (hotkey.Alt) fsModifiers |= MOD_ALT;
+        if (hotkey.Ctrl) fsModifiers |= MOD_CONTROL;
+        if (hotkey.Shift) fsModifiers |= MOD_SHIFT;
+        if (hotkey.Win) fsModifiers |= MOD_WIN;
 
         uint vk = (uint)hotkey.Key;
 
         if (!RegisterHotKey(Handle, HOTKEY_ID, fsModifiers, vk))
         {
+            DestroyHandle();
+
             throw new InvalidOperationException(
-                $"Could not register hotkey {hotkey.Key}. It may already be in use."
+                $"Could not register hotkey '{hotkey}'. It may already be in use by another application."
             );
         }
     }
@@ -49,7 +56,10 @@ internal sealed partial class HotkeyListener : NativeWindow, IDisposable
 
     public void Dispose()
     {
-        UnregisterHotKey(this.Handle, HOTKEY_ID);
-        DestroyHandle();
+        if (Handle != IntPtr.Zero)
+        {
+            UnregisterHotKey(Handle, HOTKEY_ID);
+            DestroyHandle();
+        }
     }
 }
