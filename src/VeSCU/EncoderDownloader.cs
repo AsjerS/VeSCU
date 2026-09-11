@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -18,7 +18,7 @@ internal static class EncoderDownloader
     public static async Task DownloadAsync(string encoder, string destinationDir)
     {
         using var client = new HttpClient();
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("VeSCU-Downloader");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd($"{AppInfo.Name}-Downloader");
 
         // fetch encoder catalog
         string json = await client.GetStringAsync(ManifestUrl);
@@ -82,7 +82,7 @@ internal static class EncoderDownloader
         {
             _work = work;
 
-            Text = "VeSCU";
+            Text = AppInfo.Name;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;

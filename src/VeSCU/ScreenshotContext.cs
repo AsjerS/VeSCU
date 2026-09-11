@@ -22,7 +22,7 @@ internal sealed class ScreenshotContext : ApplicationContext
         // setup tray icon
         _trayIcon = new NotifyIcon
         {
-            Text = "VeSCU",
+            Text = AppInfo.Name,
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
             ContextMenuStrip = CreateTrayMenu(),
             Visible = true
@@ -143,7 +143,7 @@ internal sealed class ScreenshotContext : ApplicationContext
         }
         catch (Exception ex)
         {
-            Program.ShowAppError(ex);
+            AppDialogs.Error(ex);
         }
     }
 
@@ -163,21 +163,11 @@ internal sealed class ScreenshotContext : ApplicationContext
             _hotkeyListener.HotkeyPressed += () => Task.Run(CaptureAndEncode);
 
             // celebrate
-            MessageBox.Show(
-                "Configuration reloaded successfully.",
-                "VeSCU",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+            AppDialogs.Info("Configuration reloaded successfully.");
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                $"Failed to reload configuration:\n\n{ex.Message}",
-                "Configuration Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
+            AppDialogs.Error($"Failed to reload configuration:\n\n{ex.Message}");
         }
     }
 }

@@ -72,18 +72,15 @@ internal sealed class AppConfig
         }
         catch (Exception ex)
         {
-            var result = MessageBox.Show(
-                $"Failed to read configuration:\n\n{ex.Message}\n\nReset to defaults?",
-                "Config Error",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning
-            );
-
-            if (result == DialogResult.Yes)
+            if (
+                AppDialogs.Confirm(
+                    $"Failed to read configuration:\n\n{ex.Message}\n\nReset to defaults?",
+                    MessageBoxIcon.Warning
+                )
+            )
             {
                 return new AppConfig().Save();
             }
-
             return null;
         }
     }

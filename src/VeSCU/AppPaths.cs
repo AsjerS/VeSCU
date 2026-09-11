@@ -1,4 +1,4 @@
-﻿namespace VeSCU;
+namespace VeSCU;
 
 internal static class AppPaths
 {
@@ -18,7 +18,7 @@ internal static class AppPaths
         )
         : Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "VeSCU",
+            AppInfo.Name,
             "config.toml"
         );
 
@@ -29,7 +29,7 @@ internal static class AppPaths
         )
         : Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "VeSCU",
+            AppInfo.Name,
             "bin"
         );
 

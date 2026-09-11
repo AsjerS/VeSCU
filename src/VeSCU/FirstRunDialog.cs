@@ -85,7 +85,7 @@ internal sealed class FirstRunDialog : Form
 
     public FirstRunDialog()
     {
-        Text = "Welcome to VeSCU";
+        Text = $"Welcome to {AppInfo.Name}";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;

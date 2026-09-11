@@ -7,7 +7,7 @@ internal sealed class AppEnvironment
         // Saving.Directory checks
         if (string.IsNullOrWhiteSpace(config.Saving.Directory))
         {
-            Program.ShowConfigError("Invalid saving directory:\n\nPath is empty.");
+            AppDialogs.Error("Invalid saving directory:\n\nPath is empty.");
             return false;
         }
 
@@ -19,14 +19,14 @@ internal sealed class AppEnvironment
         }
         catch (Exception ex)
         {
-            Program.ShowConfigError($"Invalid saving directory:\n\n{ex.Message}");
+            AppDialogs.Error($"Invalid saving directory:\n\n{ex.Message}");
             return false;
         }
 
         // Encoder.Path checks
         if (string.IsNullOrWhiteSpace(config.Encoder.Path))
         {
-            Program.ShowConfigError("Invalid encoder path:\n\nPath is empty.");
+            AppDialogs.Error("Invalid encoder path:\n\nPath is empty.");
             return false;
         }
 
@@ -35,17 +35,14 @@ internal sealed class AppEnvironment
             string encoder = Path.GetFileName(config.Encoder.Path);
 
             // prompt encoder download
-            var prompt = MessageBox.Show(
-                $"Encoder '{encoder}' was not found.\n\n" +
-                "Would you like to attempt to download it from the internet?",
-                "Encoder Missing",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (prompt != DialogResult.Yes)
+            if (
+                !AppDialogs.Confirm(
+                    $"Encoder '{encoder}' was not found.\n\n" +
+                    $"Would you like to attempt to download it from the internet?"
+                )
+            )
             {
-                Program.ShowConfigError($"Invalid encoder path:\n\n'{encoder}'");
+                AppDialogs.Error($"Invalid encoder path:\n\n'{encoder}'");
                 return false;
             }
 
@@ -59,18 +56,11 @@ internal sealed class AppEnvironment
                 switch (dialog.Error)
                 {
                     case FileNotFoundException or PlatformNotSupportedException:
-                        Program.ShowConfigError(
-                            dialog.Error.Message
-                        );
+                        AppDialogs.Error(dialog.Error.Message);
                         break;
 
                     case Exception ex:
-                        MessageBox.Show(
-                            $"Download failed:\n\n{ex.Message}",
-                            "Network Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error
-                        );
+                        AppDialogs.Error($"Download failed:\n\n{ex.Message}");
                         break;
                 }
 

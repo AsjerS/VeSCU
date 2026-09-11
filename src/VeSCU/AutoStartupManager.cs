@@ -5,12 +5,11 @@ namespace VeSCU;
 internal static class AutoStartupManager
 {
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "VeSCU";
 
     public static bool IsEnabled()
     {
         using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: false);
-        return key?.GetValue(ValueName) is not null;
+        return key?.GetValue(AppInfo.Name) is not null;
     }
 
     public static void SetEnabled(bool enable)
@@ -18,8 +17,8 @@ internal static class AutoStartupManager
         using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: true);
         
         if (enable)
-            key?.SetValue(ValueName, $"\"{Environment.ProcessPath}\"");
+            key?.SetValue(AppInfo.Name, $"\"{Environment.ProcessPath}\"");
         else
-            key?.DeleteValue(ValueName, throwOnMissingValue: false);
+            key?.DeleteValue(AppInfo.Name, throwOnMissingValue: false);
     }
 }

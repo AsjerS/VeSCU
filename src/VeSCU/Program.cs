@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace VeSCU;
 
 internal static class Program
@@ -12,10 +10,10 @@ internal static class Program
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
         Application.ThreadException += (_, e) =>
-            ShowAppError(e.Exception);
+            AppDialogs.Error(e.Exception);
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-            ShowAppError(e.ExceptionObject as Exception);
+            AppDialogs.Error((Exception)e.ExceptionObject);
 
         try
         {
@@ -26,33 +24,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            ShowAppError(ex);
+            AppDialogs.Error(ex);
         }
-    }
-
-    public static void ShowConfigError(string message)
-    {
-        var prompt = MessageBox.Show(
-            $"{message}\n\nWould you like to open the config to fix it?",
-            "Configuration Error",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Warning
-        );
-
-        if (prompt == DialogResult.Yes)
-        {
-            Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true });
-        }
-    }
-
-    public static void ShowAppError(Exception? ex)
-    {
-        if (ex is null) return;
-        MessageBox.Show(
-            ex.Message,
-            "Application Error",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error
-        );
     }
 }
