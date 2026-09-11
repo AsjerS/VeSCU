@@ -19,41 +19,20 @@ internal sealed class ScreenshotContext : ApplicationContext
         _hotkeyListener = new HotkeyListener(_config.Hotkey);
         _hotkeyListener.HotkeyPressed += () => Task.Run(CaptureAndEncode);
 
-        // setup tray menu
-        var trayMenu = new ContextMenuStrip();
-
-        trayMenu.Items.Add("Capture Screen", null, (s, e) =>
-            Task.Run(CaptureAndEncode));
-
-        trayMenu.Items.Add("Open Config", null, (s, e) =>
-            Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true }));
-
-        trayMenu.Items.Add("Reload Config", null, (s, e) =>
-            ReloadConfig());
-
-        if (!AppPaths.IsPortable)
-        {
-            trayMenu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (s, e) =>
-                AutoStartupManager.SetEnabled(((ToolStripMenuItem)s!).Checked))
-            {
-                CheckOnClick = true,
-                Checked = AutoStartupManager.IsEnabled()
-            });
-        }
-
-        trayMenu.Items.Add("-");
-
-        trayMenu.Items.Add("Exit", null, (s, e) =>
-            Shutdown());
-
         // setup tray icon
         _trayIcon = new NotifyIcon
         {
             Text = "VeSCU",
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
-            ContextMenuStrip = trayMenu,
+            ContextMenuStrip = CreateTrayMenu(),
             Visible = true
         };
+
+        _trayIcon.DoubleClick += (_, _) =>
+            OpenConfig();
+
+        _trayIcon.MouseClick += (_, e) =>
+            { if (e.Button == MouseButtons.Middle) ReloadConfig(); };
     }
 
     private void Shutdown()
@@ -63,6 +42,40 @@ internal sealed class ScreenshotContext : ApplicationContext
         Application.DoEvents();
         ExitThread();
     }
+
+    private ContextMenuStrip CreateTrayMenu()
+    {
+        var trayMenu = new ContextMenuStrip();
+
+        trayMenu.Items.Add("Capture Screen", null, (_, _) =>
+            Task.Run(CaptureAndEncode));
+
+        trayMenu.Items.Add("Open Config", null, (_, _) =>
+            Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true }));
+
+        trayMenu.Items.Add("Reload Config", null, (_, _) =>
+            ReloadConfig());
+
+        if (!AppPaths.IsPortable)
+        {
+            trayMenu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (s, _) =>
+                AutoStartupManager.SetEnabled(((ToolStripMenuItem)s!).Checked))
+            {
+                CheckOnClick = true,
+                Checked = AutoStartupManager.IsEnabled()
+            });
+        }
+
+        trayMenu.Items.Add("-");
+
+        trayMenu.Items.Add("Exit", null, (_, _) =>
+            Shutdown());
+
+        return trayMenu;
+    }
+
+    private static void OpenConfig() =>
+        Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true });
 
     private void CaptureAndEncode()
     {
