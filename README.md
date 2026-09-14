@@ -39,8 +39,11 @@ Win = false
 # directory to which screenshots should be saved
 # this default means C:\Users\YourName\Pictures\Screenshots
 Directory = "%USERPROFILE%\\Pictures\\Screenshots"
+# base filename of the screenshots
+Filename = "Screenshot_{yyyy}-{MM}-{dd}_{HH}-{mm}-{ss}"
 # the extension to append to screenshot files
 Extension = ".jxl"
+# for Directory and Filename, stuff in curly braces {} can get translated to the current time/date
 
 [Encoder]
 # the path to the program used to encode the final image
