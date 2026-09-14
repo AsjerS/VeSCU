@@ -51,7 +51,7 @@ internal sealed class ScreenshotContext : ApplicationContext
             Task.Run(CaptureAndEncode));
 
         trayMenu.Items.Add("Open Config", null, (_, _) =>
-            Process.Start(new ProcessStartInfo(AppPaths.ConfigFile) { UseShellExecute = true }));
+            OpenConfig());
 
         trayMenu.Items.Add("Reload Config", null, (_, _) =>
             ReloadConfig());
