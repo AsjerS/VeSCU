@@ -103,10 +103,8 @@ internal sealed class ScreenshotContext : ApplicationContext
             }
 
             // define output path
-            string outputPath = Path.Combine(
-                Environment.ExpandEnvironmentVariables(_config.Saving.Directory),
-                $"Screenshot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}{_config.Saving.Extension}"
-            );
+            string outputPath = AppPaths.ResolveSavingPath(_config.Saving);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
 
             // start encoder
             using var process = new Process

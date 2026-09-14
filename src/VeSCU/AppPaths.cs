@@ -1,6 +1,9 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
+
 namespace VeSCU;
 
-internal static class AppPaths
+internal static partial class AppPaths
 {
     public static string AppDirectory { get; } =
         AppDomain.CurrentDomain.BaseDirectory;
@@ -32,6 +35,25 @@ internal static class AppPaths
             AppInfo.Name,
             "bin"
         );
+
+    public static string ResolveSavingPath(AppConfig.SavingSection saving) =>
+        ResolveSavingPath(saving, DateTime.Now);
+
+    private static string ResolveSavingPath(AppConfig.SavingSection saving, DateTime now) =>
+        Path.Combine(
+            FormatTemplate(Environment.ExpandEnvironmentVariables(saving.Directory), now),
+            $"{FormatTemplate(saving.Filename, now)}{saving.Extension}"
+        );
+
+    private static string FormatTemplate(string template, DateTime now) =>
+        TokenRegex().Replace(template, match =>
+        {
+            try { return now.ToString(match.Groups[1].Value, CultureInfo.InvariantCulture); }
+            catch (FormatException) { return match.Value; }
+        });
+
+    [GeneratedRegex(@"\{([^}]+)\}")]
+    private static partial Regex TokenRegex();
 
     public static string? ResolveEncoder(string path)
     {

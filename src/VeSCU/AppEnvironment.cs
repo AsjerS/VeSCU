@@ -11,18 +11,6 @@ internal sealed class AppEnvironment
             return false;
         }
 
-        try
-        {
-            Directory.CreateDirectory(
-                Environment.ExpandEnvironmentVariables(config.Saving.Directory)
-            );
-        }
-        catch (Exception ex)
-        {
-            AppDialogs.Error($"Invalid saving directory:\n\n{ex.Message}");
-            return false;
-        }
-
         // Encoder.Path checks
         if (string.IsNullOrWhiteSpace(config.Encoder.Path))
         {

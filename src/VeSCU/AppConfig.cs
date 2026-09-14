@@ -29,6 +29,7 @@ internal sealed class AppConfig
 
     public sealed record SavingSection(
         string Directory = "%USERPROFILE%\\Pictures\\Screenshots",
+        string Filename = "Screenshot_{yyyy}-{MM}-{dd}_{HH}-{mm}-{ss}",
         string Extension = ".jxl"
     );
 
