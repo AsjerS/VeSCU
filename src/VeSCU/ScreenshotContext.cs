@@ -126,20 +126,28 @@ internal sealed class ScreenshotContext : ApplicationContext
             process.PriorityClass = ProcessPriorityClass.BelowNormal;
 
             // stream image to stdin
-            using (Stream stdin = process.StandardInput.BaseStream)
+            try
             {
+                using var stdin = process.StandardInput.BaseStream;
                 bitmap.WriteAs(_config.Encoder.InputFormat, stdin);
+            }
+            catch (Exception ex)
+            {
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                throw EncoderError(error, ex);
             }
 
             // wait for the encoder
-            string error = process.StandardError.ReadToEnd();
+            string stderr = process.StandardError.ReadToEnd();
             process.WaitForExit();
             if (process.ExitCode != 0)
             {
-                throw new InvalidOperationException(
-                    $"Encoder error (exit code {process.ExitCode}):\n{error}"
-                );
+                throw EncoderError(stderr);
             }
+
+            InvalidOperationException EncoderError(string output, Exception? inner = null) =>
+                new($"Encoder error (exit code {process.ExitCode}):\n\n{output.Trim()}", inner);
         }
         catch (Exception ex)
         {
