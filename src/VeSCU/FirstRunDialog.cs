@@ -65,14 +65,14 @@ internal sealed class FirstRunDialog : Form
     }
 
     private static readonly Preset[] Presets = [
-        new(Jxl, "-d 1 - {Output}", IsLossless: false),
-        new(Avif, "-s 6 -q 85 - {Output}", IsLossless: false),
         new(WebP, "-q 90 -m 6 -o {Output} -- -", IsLossless: false),
         new(Jpeg, "-quality 90 -outfile {Output}", IsLossless: false),
+        new(Jxl, "-d 1 - {Output}", IsLossless: false),
+        new(Avif, "-s 6 -q 85 - {Output}", IsLossless: false),
 
-        new(Jxl, "-d 0 - {Output}", IsLossless: true),
         new(WebP, "-z 9 -o {Output} -- -", IsLossless: true),
-        new(Png, "-o 2 --out {Output} -", IsLossless: true)
+        new(Png, "-o 2 --out {Output} -", IsLossless: true),
+        new(Jxl, "-d 0 - {Output}", IsLossless: true)
     ];
 
     private readonly RadioButton _radioNearLossless = new()
