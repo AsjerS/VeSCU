@@ -29,7 +29,7 @@ The program requires .NET Desktop Runtime 10 to run.
 ```toml
 [Hotkey]
 # the final hotkey results in: Ctrl+Alt+PrintScreen
-Key = "PrintScreen"
+Key = "PrintScreen" # uses https://learn.microsoft.com/dotnet/api/system.windows.forms.keys
 Ctrl = true
 Alt = true
 Shift = false
@@ -47,12 +47,13 @@ Extension = ".jxl"
 
 [Encoder]
 # the path to the program used to encode the final image
-# values that can prompt an auto download are:
+# values that can be auto downloaded are:
 # 'avifenc.exe', 'cjpeg.exe', 'cjxl.exe', 'cwebp.exe', 'oxipng.exe'
+# but any path to any program that supports stdin can work too
 Path = "cjxl.exe"
-# the arguments passed to the encoder, with {Output} being parsed to the final screenshot location
+# the arguments passed to the encoder, with {Output} being translated to the final screenshot location
 Arguments = "-d 1 - {Output}"
-# the format in which pixels should be delivered to the encoder
+# the format in which pixels should be delivered to the encoder through stdin
 # valid values are: 'Ppm', 'Png'
 InputFormat = "Ppm"
 ```
@@ -63,7 +64,3 @@ InputFormat = "Ppm"
 2. If the configuration is unusable (unwritable paths or missing encoders), it gives an error and prompt to either close the app or to open the config file to fix it. In the case of a missing encoder it first prompts to auto download the encoder.
 3. It binds the hotkey in Windows and makes the tray icon.
 4. When the hotkey is pressed or a screen capture is manually initiated, it reads all pixels from the primary stream as a bitmap, hands that bitmap to an intermediary encoder to convert it to a format like PPM/PNG, and streams that into the stdin of the encoder set in the config.
-
-## Contributing
-
-If you want to add a big feature, please make an issue first to discuss if it is in the scope of this project.
