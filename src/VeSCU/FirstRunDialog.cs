@@ -26,7 +26,7 @@ internal sealed class FirstRunDialog : Form
         "AVIF",
         "avifenc.exe",
         ".avif",
-        AppConfig.InputFormat.Ppm,
+        AppConfig.InputFormat.Png,
         "small",
         "medium"
     );
@@ -35,7 +35,7 @@ internal sealed class FirstRunDialog : Form
         "WebP",
         "cwebp.exe",
         ".webp",
-        AppConfig.InputFormat.Ppm,
+        AppConfig.InputFormat.Png,
         "medium",
         "high"
     );
@@ -68,7 +68,7 @@ internal sealed class FirstRunDialog : Form
         new(WebP, "-q 90 -m 6 -o {Output} -- -", IsLossless: false),
         new(Jpeg, "-quality 90 -outfile {Output}", IsLossless: false),
         new(Jxl, "-d 1 - {Output}", IsLossless: false),
-        new(Avif, "-s 6 -q 85 - {Output}", IsLossless: false),
+        new(Avif, "-s 6 -q 85 --input-format png --stdin {Output}", IsLossless: false),
 
         new(WebP, "-z 9 -o {Output} -- -", IsLossless: true),
         new(Png, "-o 2 --out {Output} -", IsLossless: true),
@@ -199,7 +199,7 @@ internal sealed class FirstRunDialog : Form
 
         var link = new LinkLabel
         {
-            Text = "Detailed comparison ↗",
+            Text = "Detailed comparison",
             AutoSize = true,
             Anchor = AnchorStyles.Left
         };
