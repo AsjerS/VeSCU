@@ -24,12 +24,12 @@
 		</g>
 	</defs>
 
-	<g fill="none" stroke="#100040" stroke-width="20" stroke-linecap="butt">
+	<g fill="none" stroke="#3730a0" stroke-width="20" stroke-linecap="butt">
 		<use href="#v-path" clip-path="url(#v-border-clip)" stroke-linejoin="bevel" />
 		<use href="#e-bars" />
 	</g>
 
-	<g fill="none" stroke="#7229e1" stroke-width="12" stroke-linecap="butt">
+	<g fill="none" stroke="#7767ff" stroke-width="12" stroke-linecap="butt">
 		<use href="#v-path" clip-path="url(#v-core-clip)" stroke-linejoin="bevel" />
 		<use href="#e-bars" clip-path="url(#e-core-clip)" />
 	</g>
