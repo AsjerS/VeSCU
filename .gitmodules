@@ -1,0 +1,3 @@
+[submodule "VeCore"]
+	path = VeCore
+	url = https://github.com/asjer/VeCore.git
