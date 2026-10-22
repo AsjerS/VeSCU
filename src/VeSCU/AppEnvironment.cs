@@ -1,3 +1,5 @@
+using VeCore;
+
 namespace VeSCU;
 
 internal sealed class AppEnvironment
@@ -7,14 +9,14 @@ internal sealed class AppEnvironment
         // Saving.Directory checks
         if (string.IsNullOrWhiteSpace(config.Saving.Directory))
         {
-            AppDialogs.Error("Invalid saving directory:\n\nPath is empty.");
+            AppDialogs<AppInfo>.Error("Invalid saving directory:\n\nPath is empty.");
             return false;
         }
 
         // Encoder.Path checks
         if (string.IsNullOrWhiteSpace(config.Encoder.Path))
         {
-            AppDialogs.Error("Invalid encoder path:\n\nPath is empty.");
+            AppDialogs<AppInfo>.Error("Invalid encoder path:\n\nPath is empty.");
             return false;
         }
 
@@ -24,13 +26,13 @@ internal sealed class AppEnvironment
 
             // prompt encoder download
             if (
-                !AppDialogs.Confirm(
+                !AppDialogs<AppInfo>.Confirm(
                     $"Encoder '{encoder}' was not found.\n\n" +
                     $"Would you like to attempt to download it from the internet?"
                 )
             )
             {
-                AppDialogs.Error($"Invalid encoder path:\n\n'{encoder}'");
+                AppDialogs<AppInfo>.Error($"Invalid encoder path:\n\n'{encoder}'");
                 return false;
             }
 
@@ -44,11 +46,11 @@ internal sealed class AppEnvironment
                 switch (dialog.Error)
                 {
                     case FileNotFoundException or PlatformNotSupportedException:
-                        AppDialogs.Error(dialog.Error.Message);
+                        AppDialogs<AppInfo>.Error(dialog.Error.Message);
                         break;
 
                     case Exception ex:
-                        AppDialogs.Error($"Download failed:\n\n{ex.Message}");
+                        AppDialogs<AppInfo>.Error($"Download failed:\n\n{ex.Message}");
                         break;
                 }
 

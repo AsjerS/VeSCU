@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using VeCore;
 
 namespace VeSCU;
 
@@ -16,8 +17,9 @@ internal sealed class ScreenshotContext : ApplicationContext
         _encoderPath = AppPaths.ResolveEncoder(_config.Encoder.Path)!;
 
         // setup hotkey
-        _hotkeyListener = new HotkeyListener(_config.Hotkey);
-        _hotkeyListener.HotkeyPressed += () => Task.Run(CaptureAndEncode);
+        _hotkeyListener = new HotkeyListener(
+            _config.Hotkey, () => Task.Run(CaptureAndEncode)
+        );
 
         // setup tray icon
         _trayIcon = new NotifyIcon
@@ -59,10 +61,10 @@ internal sealed class ScreenshotContext : ApplicationContext
         if (!AppPaths.IsPortable)
         {
             trayMenu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (s, _) =>
-                AutoStartupManager.SetEnabled(((ToolStripMenuItem)s!).Checked))
+                AutoStartupManager<AppInfo>.SetEnabled(((ToolStripMenuItem)s!).Checked))
             {
                 CheckOnClick = true,
-                Checked = AutoStartupManager.IsEnabled()
+                Checked = AutoStartupManager<AppInfo>.IsEnabled()
             });
         }
 
@@ -149,7 +151,7 @@ internal sealed class ScreenshotContext : ApplicationContext
         }
         catch (Exception ex)
         {
-            AppDialogs.Error(ex);
+            AppDialogs<AppInfo>.Error(ex);
         }
     }
 
@@ -165,15 +167,16 @@ internal sealed class ScreenshotContext : ApplicationContext
             _config = config;
             _encoderPath = AppPaths.ResolveEncoder(config.Encoder.Path)!;
             _hotkeyListener.Dispose();
-            _hotkeyListener = new HotkeyListener(config.Hotkey);
-            _hotkeyListener.HotkeyPressed += () => Task.Run(CaptureAndEncode);
+            _hotkeyListener = new HotkeyListener(
+                _config.Hotkey, () => Task.Run(CaptureAndEncode)
+            );
 
             // celebrate
-            AppDialogs.Info("Configuration reloaded successfully.");
+            AppDialogs<AppInfo>.Info("Configuration reloaded successfully.");
         }
         catch (Exception ex)
         {
-            AppDialogs.Error($"Failed to reload configuration:\n\n{ex.Message}");
+            AppDialogs<AppInfo>.Error($"Failed to reload configuration:\n\n{ex.Message}");
         }
     }
 }

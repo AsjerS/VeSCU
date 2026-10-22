@@ -1,32 +1,10 @@
-using System.Reflection;
 using System.Text.Json.Serialization;
-using Tomlyn;
+using VeCore;
 
 namespace VeSCU;
 
-internal sealed class AppConfig
+internal sealed class AppConfig : AppConfigHandler<AppConfig, AppInfo>
 {
-    public sealed record HotkeySection(
-        [property: JsonConverter(typeof(JsonStringEnumConverter))]
-        Keys Key = Keys.PrintScreen,
-        bool Ctrl = true,
-        bool Alt = true,
-        bool Shift = false,
-        bool Win = false
-    )
-    {
-        public override string ToString()
-        {
-            var parts = new List<string>(5);
-            if (Ctrl) parts.Add("Ctrl");
-            if (Shift) parts.Add("Shift");
-            if (Alt) parts.Add("Alt");
-            if (Win) parts.Add("Win");
-            parts.Add(Key.ToString());
-            return string.Join("+", parts);
-        }
-    }
-
     public sealed record SavingSection(
         string Directory = "%USERPROFILE%\\Pictures\\Screenshots",
         string Filename = "Screenshot_{yyyy}-{MM}-{dd}_{HH}-{mm}-{ss}",
@@ -46,74 +24,23 @@ internal sealed class AppConfig
         InputFormat InputFormat = InputFormat.Ppm
     );
 
-    public HotkeySection Hotkey { get; set; } = new();
+    public AppHotkey Hotkey { get; set; } = new();
     public SavingSection Saving { get; set; } = new();
     public EncoderSection Encoder { get; set; } = new();
 
     public static AppConfig? Load()
     {
-        try
+        var config = Load(AppPaths.ConfigFile);
+        if (config != null) return config;
+
+        using var dialog = new FirstRunDialog();
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
-            if (File.Exists(AppPaths.ConfigFile) && new FileInfo(AppPaths.ConfigFile).Length > 0)
-            {
-                string tomlText = File.ReadAllText(AppPaths.ConfigFile);
-                var config = TomlSerializer.Deserialize<AppConfig>(tomlText) ?? new AppConfig();
-
-                if (!HasAllKeys(tomlText)) config.Save();
-                return config;
-            }
-
-            using var dialog = new FirstRunDialog();
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                return dialog.SelectedConfig.Save();
-            }
-
-            return null;
+            return dialog.SelectedConfig.Save();
         }
-        catch (Exception ex)
-        {
-            if (
-                AppDialogs.Confirm(
-                    $"Failed to read configuration:\n\n{ex.Message}\n\nReset to defaults?",
-                    MessageBoxIcon.Warning
-                )
-            )
-            {
-                return new AppConfig().Save();
-            }
-            return null;
-        }
+
+        return null;
     }
 
-    public AppConfig Save()
-    {
-        Directory.CreateDirectory(
-            Path.GetDirectoryName(AppPaths.ConfigFile)!
-        );
-
-        File.WriteAllText(
-            AppPaths.ConfigFile,
-            TomlSerializer.Serialize(this)
-                .Replace("\n[", "\n\n[").Trim()
-                + Environment.NewLine
-        );
-
-        return this;
-    }
-
-    private static bool HasAllKeys(string tomlText) =>
-        typeof(AppConfig)
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .SelectMany(section =>
-                section
-                    .PropertyType
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Select(prop => prop.Name)
-                    .Prepend($"[{section.Name}]")
-            )
-            .All(token =>
-                tomlText
-                .Contains(token, StringComparison.OrdinalIgnoreCase)
-            );
+    public AppConfig Save() => Save(AppPaths.ConfigFile);
 }

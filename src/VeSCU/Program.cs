@@ -1,3 +1,5 @@
+using VeCore;
+
 namespace VeSCU;
 
 internal static class Program
@@ -10,10 +12,10 @@ internal static class Program
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
         Application.ThreadException += (_, e) =>
-            AppDialogs.Error(e.Exception);
+            AppDialogs<AppInfo>.Error(e.Exception);
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-            AppDialogs.Error((Exception)e.ExceptionObject);
+            AppDialogs<AppInfo>.Error((Exception)e.ExceptionObject);
 
         try
         {
@@ -24,7 +26,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            AppDialogs.Error(ex);
+            AppDialogs<AppInfo>.Error(ex);
         }
     }
 }

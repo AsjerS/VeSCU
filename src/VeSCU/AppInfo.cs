@@ -1,6 +1,8 @@
+using VeCore;
+
 namespace VeSCU;
 
-internal static class AppInfo
+internal sealed class AppInfo : IAppInfo
 {
-    public const string Name = "VeSCU";
+    public static string Name => "VeSCU";
 }

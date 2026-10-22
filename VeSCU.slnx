@@ -18,4 +18,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="src/VeSCU/VeSCU.csproj" />
+  <Project Path="VeCore/src/VeCore/VeCore.csproj" />
 </Solution>
