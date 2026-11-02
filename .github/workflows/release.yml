@@ -78,3 +78,91 @@ jobs:
         files: dist/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  winget:
+    needs: release
+    runs-on: windows-latest
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@v8
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: Generate WinGet Manifests
+      shell: pwsh
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        New-Item -ItemType Directory -Force -Path "manifests" | Out-Null
+
+        @"
+        # yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json
+
+        PackageIdentifier: AsjerS.VeSCU
+        PackageVersion: $env:VERSION
+        DefaultLocale: en-US
+        ManifestType: version
+        ManifestVersion: 1.12.0
+        "@ | Set-Content -Path "manifests/AsjerS.VeSCU.yaml" -Encoding utf8
+
+        @"
+        # yaml-language-server: `$schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+        PackageIdentifier: AsjerS.VeSCU
+        PackageVersion: $env:VERSION
+        PackageLocale: en-US
+        Publisher: AsjerS
+        PublisherUrl: https://github.com/AsjerS
+        PublisherSupportUrl: https://github.com/AsjerS/VeSCU/issues
+        PrivacyUrl: https://github.com/AsjerS/VeSCU/blob/main/PRIVACY.md
+        Author: AsjerS
+        PackageName: VeSCU
+        PackageUrl: https://github.com/AsjerS/VeSCU
+        License: EUPL-1.2
+        LicenseUrl: https://github.com/AsjerS/VeSCU/blob/v$env:VERSION/LICENSE
+        Copyright: (c) $((Get-Date).ToString("yyyy")) Asjer Severin
+        CopyrightUrl: https://github.com/AsjerS/VeSCU/blob/v$env:VERSION/LICENSE
+        ShortDescription: Versatile Screen Capture Utility
+        Description: A lightweight, versatile screenshot taking utility for Windows, designed to work in combination with a separate encoder executable.
+        Moniker: vescu
+        Tags:
+        - screenshot
+        - screencapture
+        ReleaseNotesUrl: https://github.com/AsjerS/VeSCU/releases/tag/v$env:VERSION
+        ManifestType: defaultLocale
+        ManifestVersion: 1.12.0
+        "@ | Set-Content -Path "manifests/AsjerS.VeSCU.locale.en-US.yaml" -Encoding utf8
+
+        @"
+        # yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+        PackageIdentifier: AsjerS.VeSCU
+        PackageVersion: $env:VERSION
+        InstallerType: inno
+        Dependencies:
+          PackageDependencies:
+          - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10
+        Installers:
+        - Architecture: x64
+          InstallerUrl: https://github.com/AsjerS/VeSCU/releases/download/v$env:VERSION/VeSCU-win-x64-installer.exe
+          InstallerSha256: $((Get-FileHash (Join-Path "dist" "VeSCU-win-x64-installer.exe") -Algorithm SHA256).Hash.ToUpper())
+        - Architecture: arm64
+          InstallerUrl: https://github.com/AsjerS/VeSCU/releases/download/v$env:VERSION/VeSCU-win-arm64-installer.exe
+          InstallerSha256: $((Get-FileHash (Join-Path "dist" "VeSCU-win-arm64-installer.exe") -Algorithm SHA256).Hash.ToUpper())
+        ManifestType: installer
+        ManifestVersion: 1.12.0
+        ReleaseDate: $((Get-Date).ToString("yyyy-MM-dd"))
+        "@ | Set-Content -Path "manifests/AsjerS.VeSCU.installer.yaml" -Encoding utf8
+
+    - name: Download wingetcreate
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/microsoft/winget-create/releases/latest/download/wingetcreate.exe" -OutFile "wingetcreate.exe"
+
+    - name: Submit to WinGet Repository
+      shell: pwsh
+      env:
+        WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      run: |
+        .\wingetcreate.exe submit manifests -t $env:WINGET_TOKEN
