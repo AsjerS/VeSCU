@@ -13,6 +13,12 @@
 
 Download a release from [**here**](https://github.com/AsjerS/VeSCU/releases/latest) and install it.
 
+It's also available on WinGet:
+
+```
+winget install AsjerS.VeSCU
+```
+
 The program requires .NET Desktop Runtime 10 to run.
 
 ## Features
