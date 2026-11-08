@@ -8,7 +8,7 @@ internal sealed class AppConfig : AppConfigHandler<AppConfig, AppInfo>
     public sealed record SavingSection(
         string Directory = "%USERPROFILE%\\Pictures\\Screenshots",
         string Filename = "Screenshot_{yyyy}-{MM}-{dd}_{HH}-{mm}-{ss}",
-        string Extension = ".jxl"
+        string Extension = ".webp"
     );
 
     public enum InputFormat
@@ -18,10 +18,10 @@ internal sealed class AppConfig : AppConfigHandler<AppConfig, AppInfo>
     }
 
     public sealed record EncoderSection(
-        string Path = "cjxl.exe",
-        string Arguments = "-d 1 - {Output}",
+        string Path = "cwebp.exe",
+        string Arguments = "-q 90 -m 6 -o {Output} -- -",
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
-        InputFormat InputFormat = InputFormat.Ppm
+        InputFormat InputFormat = InputFormat.Png
     );
 
     public AppHotkey Hotkey { get; set; } = new();
