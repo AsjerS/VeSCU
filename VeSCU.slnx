@@ -16,6 +16,7 @@
     <File Path="build.bat" />
     <File Path="LICENSE" />
     <File Path="README.md" />
+    <File Path="ThirdPartyNotices.txt" />
   </Folder>
   <Project Path="src/VeSCU/VeSCU.csproj" />
   <Project Path="VeCore/src/VeCore/VeCore.csproj" />
