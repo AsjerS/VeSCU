@@ -96,6 +96,9 @@ jobs:
       run: |
         New-Item -ItemType Directory -Force -Path "manifests" | Out-Null
 
+        $x64Hash = (Get-FileHash "dist/VeSCU-win-x64-installer.exe" -Algorithm SHA256).Hash.ToUpper()
+        $arm64Hash = (Get-FileHash "dist/VeSCU-win-arm64-installer.exe" -Algorithm SHA256).Hash.ToUpper()
+
         @"
         # yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json
 
@@ -145,11 +148,21 @@ jobs:
           - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10
         Installers:
         - Architecture: x64
+          Scope: machine
           InstallerUrl: https://github.com/AsjerS/VeSCU/releases/download/v$env:VERSION/VeSCU-win-x64-installer.exe
-          InstallerSha256: $((Get-FileHash (Join-Path "dist" "VeSCU-win-x64-installer.exe") -Algorithm SHA256).Hash.ToUpper())
+          InstallerSha256: $x64Hash
+        - Architecture: x64
+          Scope: user
+          InstallerUrl: https://github.com/AsjerS/VeSCU/releases/download/v$env:VERSION/VeSCU-win-x64-installer.exe
+          InstallerSha256: $x64Hash
         - Architecture: arm64
+          Scope: machine
           InstallerUrl: https://github.com/AsjerS/VeSCU/releases/download/v$env:VERSION/VeSCU-win-arm64-installer.exe
-          InstallerSha256: $((Get-FileHash (Join-Path "dist" "VeSCU-win-arm64-installer.exe") -Algorithm SHA256).Hash.ToUpper())
+          InstallerSha256: $arm64Hash
+        - Architecture: arm64
+          Scope: user
+          InstallerUrl: https://github.com/AsjerS/VeSCU/releases/download/v$env:VERSION/VeSCU-win-arm64-installer.exe
+          InstallerSha256: $arm64Hash
         ManifestType: installer
         ManifestVersion: 1.12.0
         ReleaseDate: $((Get-Date).ToString("yyyy-MM-dd"))
