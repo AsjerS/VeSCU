@@ -173,6 +173,13 @@ jobs:
       run: |
         Invoke-WebRequest -Uri "https://github.com/microsoft/winget-create/releases/latest/download/wingetcreate.exe" -OutFile "wingetcreate.exe"
 
+    - name: Force-Sync Fork with Upstream
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      run: |
+        gh repo sync AsjerS/winget-pkgs --source microsoft/winget-pkgs --force -b master
+
     - name: Submit to WinGet Repository
       shell: pwsh
       env:
