@@ -22,7 +22,7 @@ Compression=lzma2/max
 SolidCompression=yes
 
 [Files]
-Source: "..\src\VeSCU\bin\Release\net10.0-windows\{#AppArch}\publish\VeSCU.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\VeSCU\bin\Release\net11.0-windows\{#AppArch}\publish\VeSCU.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "VeSCU"; Flags: dontcreatekey uninsdeletevalue

@@ -23,7 +23,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v6
       with:
-        dotnet-version: '10.0.x'
+        dotnet-version: '11.0.x'
 
     - name: Publish VeSCU (${{ matrix.arch }})
       run: >
@@ -37,7 +37,7 @@ jobs:
     - name: Package Portable ZIP (${{ matrix.arch }})
       shell: pwsh
       run: |
-        $publishDir = "src/VeSCU/bin/Release/net10.0-windows/${{ matrix.arch }}/publish"
+        $publishDir = "src/VeSCU/bin/Release/net11.0-windows/${{ matrix.arch }}/publish"
         New-Item -ItemType Directory -Force -Path dist
         New-Item -ItemType File -Force -Path "$publishDir/config.toml"
         Compress-Archive -Path "$publishDir/VeSCU.exe", "$publishDir/config.toml" -DestinationPath "dist/VeSCU-${{ matrix.arch }}-portable.zip"
@@ -145,7 +145,7 @@ jobs:
         InstallerType: inno
         Dependencies:
           PackageDependencies:
-          - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10
+          - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.11
         Installers:
         - Architecture: x64
           Scope: machine

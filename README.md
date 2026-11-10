@@ -6,7 +6,7 @@
   [![Release](https://img.shields.io/github/v/release/AsjerS/VeSCU?style=flat-square)](https://github.com/AsjerS/VeSCU/releases)
   [![License](https://img.shields.io/github/license/AsjerS/VeSCU?style=flat-square)](LICENSE)
   [![Platform](https://img.shields.io/badge/platform-Windows%2011-0078D4?style=flat-square)](https://github.com/AsjerS/VeSCU/releases)
-  [![Runtime](https://img.shields.io/badge/runtime-.NET%2010.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/download/dotnet/10.0)
+  [![Runtime](https://img.shields.io/badge/runtime-.NET%2011.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/download/dotnet/11.0)
 </div>
 
 ## Installation
@@ -19,7 +19,7 @@ It's also available on WinGet:
 winget install AsjerS.VeSCU
 ```
 
-The program requires .NET Desktop Runtime 10 to run.
+The program requires [.NET Desktop Runtime 11](https://dotnet.microsoft.com/download/dotnet/11.0) to run.
 
 ## Features
 
