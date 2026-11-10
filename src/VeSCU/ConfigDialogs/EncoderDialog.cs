@@ -1,91 +1,24 @@
 using System.Diagnostics;
 
-namespace VeSCU;
+namespace VeSCU.ConfigDialogs;
 
-internal sealed class FirstRunDialog : Form
+internal sealed class EncoderDialog : Form, IConfigDialog<AppConfig.EncoderSection>
 {
-    private sealed record Codec(
-        string Name,
-        string EncoderPath,
-        string SavingExt,
-        AppConfig.InputFormat Format,
-        string Size,
-        string Compat
-    );
-
-    private static readonly Codec Jxl = new(
-        "JPEG XL",
-        "cjxl.exe",
-        ".jxl",
-        AppConfig.InputFormat.Ppm,
-        "tiny",
-        "low"
-    );
-
-    private static readonly Codec Avif = new(
-        "AVIF",
-        "avifenc.exe",
-        ".avif",
-        AppConfig.InputFormat.Png,
-        "small",
-        "medium"
-    );
-
-    private static readonly Codec WebP = new(
-        "WebP",
-        "cwebp.exe",
-        ".webp",
-        AppConfig.InputFormat.Png,
-        "medium",
-        "high"
-    );
-
-    private static readonly Codec Jpeg = new(
-        "JPEG",
-        "cjpeg.exe",
-        ".jpg",
-        AppConfig.InputFormat.Ppm,
-        "large",
-        "max"
-    );
-
-    private static readonly Codec Png = new(
-        "PNG",
-        "oxipng.exe",
-        ".png",
-        AppConfig.InputFormat.Png,
-        "large",
-        "max"
-    );
-
-    private sealed record Preset(Codec Codec, string Args, bool IsLossless)
-    {
-        public string DisplayText =>
-            $"{Codec.Name} ({Codec.SavingExt}): {Codec.Size} size, {Codec.Compat} compatibility";
-    }
-
-    private static readonly Preset[] Presets = [
-        new(WebP, "-q 90 -m 6 -o {Output} -- -", IsLossless: false),
-        new(Jpeg, "-quality 90 -outfile {Output}", IsLossless: false),
-        new(Jxl, "-d 1 - {Output}", IsLossless: false),
-        new(Avif, "-s 6 -q 85 --input-format png --stdin {Output}", IsLossless: false),
-
-        new(WebP, "-z 9 -o {Output} -- -", IsLossless: true),
-        new(Png, "-o 2 --out {Output} -", IsLossless: true),
-        new(Jxl, "-d 0 - {Output}", IsLossless: true)
-    ];
-
     private readonly RadioButton _radioNearLossless = new()
-        { Text = "Near-lossless (recommended)", AutoSize = true, Checked = true };
+        { Text = "Near-lossless (recommended)", AutoSize = true, Checked = true, Tag = QualityMode.NearLossless };
     private readonly RadioButton _radioLossless = new()
-        { Text = "Lossless (pixel perfect)", AutoSize = true };
+        { Text = "Lossless (pixel perfect)", AutoSize = true, Tag = QualityMode.Lossless };
+    private readonly RadioButton[] _qualityRadios;
     private readonly RadioButton[] _codecRadios = new RadioButton[4];
 
-    public AppConfig SelectedConfig { get; private set; } = new();
+    private QualityMode SelectedQuality => 
+        (QualityMode)_qualityRadios.First(r => r.Checked).Tag!;
 
-    public FirstRunDialog()
+    public AppConfig.EncoderSection Value { get; private set; } = new();
+
+    public EncoderDialog()
     {
-        Text = $"Welcome to {AppInfo.Name}";
+        Text = $"Encoder Configurator - {AppInfo.Name}";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -116,6 +49,8 @@ internal sealed class FirstRunDialog : Form
         content.Controls.Add(CreateQualitySection());
         content.Controls.Add(CreateCodecSection());
         mainLayout.Controls.Add(CreateBottomBar(), 0, 1);
+
+        _qualityRadios = [_radioNearLossless, _radioLossless];
 
         _radioNearLossless.CheckedChanged += (_, _) => UpdateCodecRadios();
         _radioLossless.CheckedChanged += (_, _) => UpdateCodecRadios();
@@ -225,8 +160,8 @@ internal sealed class FirstRunDialog : Form
 
     private void UpdateCodecRadios()
     {
-        var filtered = Presets.Where(
-            p => p.IsLossless == _radioLossless.Checked
+        var filtered = EncoderPreset.All.Where(
+            p => p.Quality == SelectedQuality
         ).ToArray();
 
         for (int i = 0; i < _codecRadios.Length; i++)
@@ -252,13 +187,8 @@ internal sealed class FirstRunDialog : Form
     private void OnSaveAndContinue(object? sender, EventArgs e)
     {
         var checkedRadio = _codecRadios.FirstOrDefault(r => r.Visible && r.Checked);
-        if (checkedRadio?.Tag is not Preset chosen) return;
+        if (checkedRadio?.Tag is not EncoderPreset chosen) return;
 
-        var defaults = new AppConfig();
-        SelectedConfig = new AppConfig
-        {
-            Saving = defaults.Saving with { Extension = chosen.Codec.SavingExt },
-            Encoder = new(chosen.Codec.EncoderPath, chosen.Args, chosen.Codec.Format)
-        };
+        Value = chosen.Config;
     }
 }

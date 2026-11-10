@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using VeCore;
+using VeSCU.ConfigDialogs;
 
 namespace VeSCU;
 
@@ -52,7 +53,16 @@ internal sealed class ScreenshotContext : ApplicationContext
         trayMenu.Items.Add("Capture Screen", null, (_, _) =>
             Task.Run(CaptureAndEncode));
 
-        trayMenu.Items.Add("Open Config", null, (_, _) =>
+        trayMenu.Items.Add("Open Encoder Configurator", null, (_, _) =>
+        {
+            if (ConfigDialog.Prompt<EncoderDialog, AppConfig.EncoderSection>(out var encoder))
+            {
+                _config.Encoder = encoder;
+                _config.Save();
+            }
+        });
+
+        trayMenu.Items.Add("Open Config File", null, (_, _) =>
             OpenConfig());
 
         trayMenu.Items.Add("Reload Config", null, (_, _) =>
@@ -105,7 +115,7 @@ internal sealed class ScreenshotContext : ApplicationContext
             }
 
             // define output path
-            string outputPath = AppPaths.ResolveSavingPath(_config.Saving);
+            string outputPath = AppPaths.ResolveSavingPath(_config.Saving, _config.Encoder.Extension);
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
 
             // start encoder

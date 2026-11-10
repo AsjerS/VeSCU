@@ -36,14 +36,14 @@ internal static partial class AppPaths
             "bin"
         );
 
-    public static string ResolveSavingPath(AppConfig.SavingSection saving) =>
-        ResolveSavingPath(saving, DateTime.Now);
-
-    private static string ResolveSavingPath(AppConfig.SavingSection saving, DateTime now) =>
-        Path.Combine(
+    public static string ResolveSavingPath(AppConfig.SavingSection saving, string extension)
+    {
+        var now = DateTime.Now;
+        return Path.Combine(
             FormatTemplate(Environment.ExpandEnvironmentVariables(saving.Directory), now),
-            $"{FormatTemplate(saving.Filename, now)}{saving.Extension}"
+            $"{FormatTemplate(saving.Filename, now)}{extension}"
         );
+    }
 
     private static string FormatTemplate(string template, DateTime now) =>
         TokenRegex().Replace(template, match =>
