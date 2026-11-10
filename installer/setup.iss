@@ -14,7 +14,7 @@ SetupIconFile=..\src\VeSCU\app.ico
 
 ArchitecturesInstallIn64BitMode=x64compatible arm64
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequiredOverridesAllowed=dialog commandline
 
 OutputDir=out
 OutputBaseFilename=VeSCU-{#AppArch}-installer
